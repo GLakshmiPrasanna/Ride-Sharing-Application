@@ -1,0 +1,109 @@
+<%- include("header") %>
+
+<script>
+    const token = '<%= token %>';
+</script>
+
+<div class="main">
+    <h1>Welcome, Traveler!</h1>
+    <h2>Options for Traveler</h2>
+    <ol class="main">
+        <li class="mid">
+            <button onclick="shareRideDetails()">Share ride details</button>
+            <form id="shareRideForm" style="display:none;" class="main">
+                <div class="mid">
+                    <label for="companionUsername">Companion Username: </label>
+                    <input type="text" id="companionUsername" name="companionUsername" required>
+                </div>
+                <div class="mid">
+                    <label for="tripId">Trip ID:</label>
+                    <input type="text" id="tripId" name="tripId" required>
+                </div>
+                <div class="mid">
+                    <label for="driverName">Driver Name</label>
+                    <input type="text" id="driverName" name="driverName" required>
+                </div>
+                <div class="mid">
+                    <label for="driverPhoneNumber">Driver Phone Number</label>
+                    <input type="text" id="driverPhoneNumber" name="driverPhoneNumber" required>
+                </div>
+                <div class="mid">
+                    <label for="cabNumber">Cab Number</label>
+                    <input type="text" id="cabNumber" name="cabNumber" required>
+                </div>
+                <div class="mid">
+                    <label for="duration">Duration:</label>
+                    <input type="text" id="duration" name="duration" required placeholder="hh:mm">
+                </div>
+                <div class="mid">
+                    <button type="button" onclick="submitRideDetails()">Submit</button>
+                </div>
+            </form>
+        </li>
+        <li class="mid">
+            <button onclick="reviewAuditTrail()">Review the audit trail</button>
+            <div id="auditTrail"></div>
+        </li>
+    </ol>
+</div>
+
+<script>
+    function shareRideDetails() {
+        document.getElementById('shareRideForm').style.display = 'block';
+    }
+
+    function submitRideDetails() {
+        const tripId = document.getElementById('tripId').value;
+        const driverName = document.getElementById('driverName').value;
+        const driverPhoneNumber = document.getElementById('driverPhoneNumber').value;
+        const cabNumber = document.getElementById('cabNumber').value;
+
+        console.log('Submitting ride details:', { tripId, driverName, driverPhoneNumber, cabNumber });
+        console.log('Bearer Token:', `Bearer ${token}`);
+        fetch('/share-ride-details', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`, 
+            },
+            body: JSON.stringify({ tripId, driverName, driverPhoneNumber, cabNumber }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            document.getElementById('shareRideForm').style.display = 'none';
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Error sharing ride details');
+        });
+    }
+
+    function reviewAuditTrail() {
+        console.log('Bearer Token:', `Bearer ${token}`);
+        fetch('/review-audit-trail', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,  
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            const auditTrailDiv = document.getElementById('auditTrail');
+            auditTrailDiv.innerHTML = '<h3>Audit Trail</h3>';
+            if (data.auditTrail) {
+                data.auditTrail.forEach(ride => {
+                auditTrailDiv.innerHTML += `<p>Trip ID: ${ride.tripId}, Driver: ${ride.driverName}, Status: ${ride.status}</p>`;
+            });
+            } else {
+                auditTrailDiv.innerHTML += '<p>No audit trail data available.</p>';
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Error fetching audit trail');
+        });
+    }
+</script>
+
+<%- include("footer") %>

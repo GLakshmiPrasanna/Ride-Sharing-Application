@@ -1,0 +1,76 @@
+<%- include("header") %>
+
+<div class="main">   
+
+    <h1>Welcome to the Ride Sharing App</h1>
+
+    <div id="loginForm" class="main">
+        <h2>Login</h2>
+        <form action="/login" method="post" class="main">
+            <div class="mid">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="mid">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="mid">
+                <label for="role">Role:</label>
+                <select id="role" name="role" required>
+                    <option value="traveler">Traveler</option>
+                    <option value="companion">Companion</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="mid">
+                <button type="submit">Login</button>
+            </div>
+        </form>
+        <p>Do not have an account? <a onclick="toggleForms()">Register</a></p>
+    </div>
+
+    <div id="registerForm" style="display: none;" class="main">
+        <h2>Register</h2>
+        <form action="/register" method="post" class="main">
+            <div class="mid">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="mid">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="mid">
+                <label for="role">Role:</label>
+                <select id="role" name="role" required>
+                    <option value="traveler">Traveler</option>
+                    <option value="companion">Companion</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div class="mid">
+                <button type="submit">Register</button>
+            </div>
+        </form>
+        <p>Already have an account? <a onclick="toggleForms()">Login</a></p>
+    </div>
+
+</div>
+
+<script>
+    function toggleForms() {
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+
+        if (loginForm.style.display === 'none') {
+            loginForm.style.display = 'block';
+            registerForm.style.display = 'none';
+        } else {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+        }
+    }
+</script>
+
+<%- include("footer") %>

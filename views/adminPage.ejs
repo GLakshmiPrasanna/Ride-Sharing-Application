@@ -1,0 +1,52 @@
+<%- include("header") %>
+
+<script>
+    const token = '<%= token %>';
+</script>
+
+<div class="main">
+    <h1>Welcome, Admin!</h1>
+    <h2>Options for Admin</h2>
+    <ol class="main">
+        <li class="mid"><button onclick="viewAllRides()">View all the rides</button></li>
+        <li class="mid"><button onclick="accessFeedback()">Access the overall experience feedback</button></li>
+    </ol>
+</div>
+
+<script>
+    function viewAllRides() {
+        fetch('/view-all-rides', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(JSON.stringify(data.allRides));
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Error viewing all rides');
+        });
+    }
+
+    function accessFeedback() {
+        fetch('/access-feedback', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`, 
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(JSON.stringify(data.allFeedback));
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Error accessing feedback');
+        });
+    }
+</script>
+
+<%- include("footer") %>

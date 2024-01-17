@@ -1,0 +1,187 @@
+<%- include("header") %>
+
+<script>
+    const token = '<%= token %>';
+</script>
+
+<div class="main">
+    <h1>Welcome, Companion!</h1>
+    <h2>Options for Companion</h2>
+    <ol class="main">
+        <li class="mid"><button onclick="viewSharedRides()">View Shared Rides</button></li>
+        <div id="sharedRidesContainer"></div>
+
+        <li class="mid">
+            <button onclick="toggleTripIdInput()">Track the ride</button>
+            <div id="tripIdContainer" style="display: none;" class="main">
+                <div class="mid">
+                    <label for="tripIdInput">Trip ID:</label>
+                    <input type="text" id="tripIdInput" name="tripIdInput">
+                </div>
+                <div class="mid">
+                    <button onclick="trackRide()">Track</button>
+                </div>
+            </div>
+        </li>
+
+        <li class="mid">
+            <button onclick="toggleFeedbackInput()">Share feedback with Admin</button>
+            <div id="feedbackInputContainer" style="display: none;" class="main">
+                <div class="mid">
+                    <label for="feedbackText">Enter your feedback:</label>
+                    <input type="text" id="feedbackText" name="feedbackText" placeholder="Type your feedback here">
+                </div>
+                <div class="mid">
+                    <button onclick="shareFeedback()">Submit feedback</button>
+                </div>
+            </div>
+        </li>
+
+        <li class="mid"><button onclick="viewNotifications()">View Notifications</button></li>
+        <div id="notificationsContainer "></div>
+
+    </ol>
+</div>
+
+<script>
+    function viewSharedRides() {
+        const sharedRidesContainer = document.getElementById('sharedRidesContainer');
+        fetch('/companion-rides', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            const companionRides = data.companionRides;
+            if (companionRides && companionRides.length > 0) {
+                sharedRidesContainer.innerHTML = '';
+                companionRides.forEach(ride => {
+                    const rideElement = document.createElement('div');
+                    rideElement.innerHTML = `<p>Trip ID: ${ride.tripId}, Driver: ${ride.driverName}, Status: ${ride.status}</p>`;
+                    sharedRidesContainer.appendChild(rideElement);
+                });
+            } else {
+                sharedRidesContainer.innerHTML = '<p>No shared rides available.</p>';
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Error fetching shared rides');
+        });
+    }
+
+    function toggleTripIdInput() {
+        const tripIdContainer = document.getElementById('tripIdContainer');
+
+        if (tripIdContainer.style.display === 'none' || tripIdContainer.style.display === '') {
+            tripIdContainer.style.display = 'block';
+        } else {
+            tripIdContainer.style.display = 'none';
+        }
+    }
+
+    function trackRide() {
+        const tripId = document.getElementById('tripIdInput').value;
+        fetch(`/track-ride/${tripId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            toggleTripIdInput();
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Error tracking ride');
+        });
+    }
+
+    function toggleFeedbackInput() {
+        const feedbackInputContainer = document.getElementById('feedbackInputContainer');
+        const feedbackText = document.getElementById('feedbackText');
+
+        if (feedbackInputContainer.style.display === 'none') {
+            feedbackInputContainer.style.display = 'block';
+            feedbackText.focus();
+        } else {
+            feedbackInputContainer.style.display = 'none';
+        }
+    }
+
+    function shareFeedback() {
+        const feedbackText = document.getElementById('feedbackText').value;
+
+        if (!feedbackText) {
+            alert('Please enter your feedback.');
+            return;
+        }
+
+        fetch('/share-feedback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ feedbackText }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(data.message);
+            toggleFeedbackInput();
+            document.getElementById('feedbackText').value = '';
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Error sharing feedback');
+        });
+    }
+
+    function viewNotifications() {
+        const notificationsContainer = document.getElementById('notificationsContainer');
+        fetch('/companion-notifications', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            const notifications = data.notifications;
+        if (notifications && notifications.length > 0) {
+            notificationsContainer.innerHTML = notifications.map(n => `<p>${n.message}</p>`).join('');
+            markNotificationsAsRead();
+        } else {
+            notificationsContainer.innerHTML = '<p>No notifications available.</p>';
+        }
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Error fetching notifications');
+        });
+    }
+
+    function markNotificationsAsRead() {
+        fetch('/mark-notifications-as-read', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data.message);
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Error marking notifications as read');
+        });
+    }
+</script>
+
+<%- include("footer") %>
